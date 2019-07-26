@@ -45,10 +45,10 @@ public class Entry {
 
     @Override
     public String toString() {
-        return "name='" + name + '\n' +
-                ", genre='" + genre + '\n' +
-                ", artist='" + artist + '\n' +
-                ", image='" + image + '\n' +
-                ", album='" + album + '\n';
+        return "name=" + name + '\n' +
+                ", album=" + album + '\n' +
+                ", artist=" + artist + '\n' +
+                ", genre=" + genre + '\n' +
+                ", image=" + image + '\n';
     }
 }

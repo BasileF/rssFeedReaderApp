@@ -54,12 +54,15 @@ public class Parser {
                             } else if ("name".equalsIgnoreCase(tag)) current.setName(text);
                             else if ("artist".equalsIgnoreCase(tag)) current.setArtist(text);
                             else if ("image".equalsIgnoreCase(tag)) current.setImage(text);
-                            else if ("category".equalsIgnoreCase(tag)) current.setGenre(text);
+                            else if ("category".equalsIgnoreCase(tag)) current.setGenre(xpp.getAttributeValue(1));
                             else if ("collection".equalsIgnoreCase(tag)) current.setAlbum(text);
                         }
                         break;
                 }
                 eventType = xpp.next();
+            }
+            for(Entry song : songs) {
+                Log.d(TAG, song.toString());
             }
         } catch (Exception e) {
             status = false;
