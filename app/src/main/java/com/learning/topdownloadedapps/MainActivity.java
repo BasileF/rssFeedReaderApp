@@ -19,6 +19,11 @@ public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity";
     private ListView listView;
+    private String feedURL = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=%d/xml";
+    private int feedLimit = 10;
+    private String validate = "";
+    private final String STATE_LIMIT = "FeedLimit";
+    private final String STATE_URL = "FeedURL";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,41 +31,63 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         listView = findViewById(R.id.listView);
 
+        if(savedInstanceState != null) {
+            feedLimit = savedInstanceState.getInt(STATE_LIMIT);
+            feedURL = savedInstanceState.getString(STATE_URL);
+        }
+
         Log.d(TAG, "onCreate: Start AsyncTask");
         IncomingData incData = new IncomingData();
-        incData.execute("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=10/xml");
+        incData.execute(String.format(feedURL, feedLimit));
         Log.d(TAG, "onCreate: Finished");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.feeds_menu, menu);
+        if(feedLimit == 10) menu.findItem(R.id.top10).setChecked(true);
+        else menu.findItem(R.id.top25).setChecked(true);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        String feedURL;
-
         switch(id) {
+            case R.id.topSongs:
+                feedURL = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=%d/xml";
+                break;
+            case R.id.topAlbums:
+                feedURL = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topalbums/limit=%d/xml";
+                break;
             case R.id.top10:
-                feedURL = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=10/xml";
-                break;
             case R.id.top25:
-                feedURL = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=25/xml";
+                if(!item.isChecked()) {
+                    item.setChecked(true);
+                    feedLimit = 35 - feedLimit;
+                    Log.d(TAG, "onOptionsItemSelected: title = " + item.getTitle() + "feedLimit changed from " + (35-feedLimit) + " to " + feedLimit);
+                }else Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + " is already selected.");
                 break;
-            case R.id.top200:
-                feedURL = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=200/xml";
+            case R.id.refresh:
+                validate = "";
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
-        downloadUrl(feedURL);
+        downloadUrl(String.format(feedURL, feedLimit));
         return true;
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(STATE_LIMIT, feedLimit);
+        outState.putString(STATE_URL, feedURL);
+        super.onSaveInstanceState(outState);
+    }
+
     private void downloadUrl(String feedURL){
+        if(feedURL.equals(validate)) return;
+        validate = feedURL;
         IncomingData incData = new IncomingData();
         incData.execute(feedURL);
     }
